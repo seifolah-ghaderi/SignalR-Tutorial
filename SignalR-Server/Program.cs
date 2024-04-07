@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SignalR;
 using SignalR_Server;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,13 +19,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapPost("brodcast", async (string message, IHubContext<NotificationHub, INotificationClient> hubContext) =>
+    {
+        await hubContext.Clients.All.ReceiveMessageFromServer($"broadcast:{message}");
+        return Results.NoContent();
+    });
+
 app.UseHttpsRedirection();
 
 //app.UseEndpoints(ep =>
 //    ep.MapHub<NotificationHub>("/hubs-notify")
 //);
 
-app.MapHub<NotificationHub>("/hubs-notify");
+app.MapHub<NotificationHub>("/hubs/notify");
 
 app.Run();
 

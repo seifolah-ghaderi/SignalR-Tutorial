@@ -2,7 +2,7 @@
 
 namespace SignalR_Server
 {
-    public sealed class NotificationHub : Hub
+    public sealed class NotificationHub : Hub<INotificationClient>
     {
         /// <summary>
         /// this function be clled when the default message sent to server:
@@ -13,7 +13,7 @@ namespace SignalR_Server
         /// <returns></returns>
         public override async Task OnConnectedAsync()
         {
-            await this.Clients.All.SendAsync("receiveMessageFromServer", $"new client", $"{this.Context.ConnectionId}");
+            await this.Clients.All.ReceiveMessageFromServer($"{this.Context.ConnectionId}");
             Console.WriteLine($"Conneected {this.Context.ConnectionId}");
         }
 
@@ -27,7 +27,12 @@ namespace SignalR_Server
         /// <returns></returns>
         public async Task CallMe(string message)
         {
-            await this.Clients.All.SendAsync("receiveMessageFromServer", "call from client", $"{Context.ConnectionId}:{message}♥");
+            await this.Clients.All.ReceiveMessageByTagFromServer("call from client", $"{Context.ConnectionId}:{message}♥");
+        }
+
+        public async Task CheckMe()
+        {
+            await this.Clients.Caller.ReceiveMessageFromServer( $"your id is : {Context.ConnectionId}");
         }
     }
 }
